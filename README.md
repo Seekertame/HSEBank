@@ -218,3 +218,81 @@ Presentation.Console  ─────→  Application  ─────→  Domai
 - **Visitor** фиксирует формат экспорта независимо от доменных классов (можно добавить ещё посетителей для CSV/YAML).
     
 - **Proxy** позволяет менять источник данных (in-memory → БД) и при этом держать быстрые чтения без изменений в приложении.
+
+# SOLID / GRASP — компактно и с привязкой к классам
+
+## SOLID
+
+- **S — Single Responsibility**
+    
+    - `BankAccount` — инварианты счёта и пересчёт баланса (`RecomputeBalance`).
+        
+    - `Operation` — состояние операции и её валидное изменение (`Update`).
+        
+    - `OperationFactory` — единая точка создания `Operation`.
+        
+    - `AnalyticsService` — только расчёты (сальдо, группировка).
+        
+    - `*Facade` — оркестрация сценариев (CRUD/аналитика).
+        
+    - `CsvOperationImporter` / `JsonOperationExportVisitor` — только импорт/экспорт.
+        
+- **O — Open/Closed**
+    
+    - Новые импортеры/экспортёры добавляются без правок каркаса:  
+        `ImporterBase` (Template Method), `IExportVisitor` (Visitor).
+        
+    - Новые команды/сценарии — через реализацию `ICommand`, `TimedCommand` уже готов их декорировать.
+        
+- **L — Liskov Substitution**
+    
+    - Любая реализация `I*Repository` (InMemory/Cached/в будущем EF Core) взаимозаменяема для фасадов/сервисов.
+        
+    - `IBankAccountRepository` ⇄ `InMemoryBankAccountRepository` ⇄ `CachedBankAccountRepository`.
+        
+- **I — Interface Segregation**
+    
+    - Раздельные контракты: `IBankAccountRepository`, `ICategoryRepository`, `IOperationRepository` — без «толстого» общего интерфейса.
+        
+- **D — Dependency Inversion**
+    
+    - `Application` зависит от **абстракций** (`I*Repository`, `OperationFactory`), реализации подключаются в `Program.cs` через DI (`Microsoft.Extensions.DependencyInjection`).
+        
+
+## GRASP
+
+- **High Cohesion (высокая связность)**
+    
+    - `AnalyticsService` занимается только аналитикой;
+        
+    - `ConsoleUi` — только ввод/вывод;
+        
+    - `Money`, `Description`, `Id`-типы — локализуют правила форматирования/валидации.
+        
+- **Low Coupling (слабая связность)**
+    
+    - UI (`Screens/*`) знает только фасады;
+        
+    - Фасады знают только репозитории (через интерфейсы) и доменные сущности;
+        
+    - `Domain` не зависит от инфраструктуры/UI.
+        
+- **Controller**
+    
+    - `AccountsFacade`, `CategoriesFacade`, `OperationsFacade`, `AnalyticsFacade` — контроллеры прикладных сценариев.
+        
+- **Information Expert**
+    
+    - `BankAccount.RecomputeBalance` — баланс считает «владелец» данных;
+        
+    - `AnalyticsService.GroupByCategory` — агрегирует там, где есть знание предметной логики.
+        
+- **Creator**
+    
+    - `OperationFactory` создаёт `Operation` (знает её зависимости и правила).
+        
+- **Polymorphism/Indirection (опционально, но уместно отметить)**
+    
+    - Полиморфизм по репозиториям (`I*Repository`) и по импортёрам/экспортёрам (`ImporterBase`, `IExportVisitor`) снижает сцепление и упрощает расширение.
+        
+
