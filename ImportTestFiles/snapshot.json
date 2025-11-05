@@ -1,0 +1,46 @@
+{
+  "accounts": [
+    {
+      "id": "11111111-aaaa-bbbb-cccc-000000000001",
+      "name": "JSON Wallet",
+      "balance": 5000
+    },
+    {
+      "id": "22222222-aaaa-bbbb-cccc-000000000002",
+      "name": "JSON Savings",
+      "balance": 12000
+    }
+  ],
+  "categories": [
+    {
+      "id": "33333333-aaaa-bbbb-cccc-000000000003",
+      "type": "Expense",
+      "name": "Rent"
+    },
+    {
+      "id": "44444444-aaaa-bbbb-cccc-000000000004",
+      "type": "Income",
+      "name": "Salary"
+    }
+  ],
+  "operations": [
+    {
+      "id": "55555555-aaaa-bbbb-cccc-000000000005",
+      "type": "Expense",
+      "accountId": "11111111-aaaa-bbbb-cccc-000000000001",
+      "categoryId": "33333333-aaaa-bbbb-cccc-000000000003",
+      "amount": 450,
+      "date": "2025-11-04T10:00:00Z",
+      "description": "Apartment rent"
+    },
+    {
+      "id": "66666666-aaaa-bbbb-cccc-000000000006",
+      "type": "Income",
+      "accountId": "22222222-aaaa-bbbb-cccc-000000000002",
+      "categoryId": "44444444-aaaa-bbbb-cccc-000000000004",
+      "amount": 90000,
+      "date": "2025-11-01T09:00:00Z",
+      "description": "Monthly salary"
+    }
+  ]
+}

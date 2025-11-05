@@ -1,0 +1,26 @@
+accounts:
+  - id: deadbeef-0000-4000-8000-0000000000aa
+    name: YAML Card
+    balance: 3050.5
+categories:
+  - id: feedface-0000-4000-8000-0000000000bb
+    type: Expense
+    name: Food
+  - id: cafebabe-0000-4000-8000-0000000000cc
+    type: Income
+    name: Bonus
+operations:
+  - id: beadbead-0000-4000-8000-0000000000dd
+    type: Expense
+    accountId: deadbeef-0000-4000-8000-0000000000aa
+    categoryId: feedface-0000-4000-8000-0000000000bb
+    amount: 23.40
+    date: 2025-11-05T12:30:00Z
+    description: Lunch
+  - id: abbaabba-0000-4000-8000-0000000000ee
+    type: Income
+    accountId: deadbeef-0000-4000-8000-0000000000aa
+    categoryId: cafebabe-0000-4000-8000-0000000000cc
+    amount: 700.00
+    date: 2025-11-06T17:45:00Z
+    description: Quarterly bonus
