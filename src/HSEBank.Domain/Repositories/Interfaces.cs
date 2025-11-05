@@ -28,5 +28,6 @@ namespace HSEBank.Domain.Repositories
         void Add(Operation op);
         void Update(Operation op);
         void Remove(OperationId id);
+        IEnumerable<Operation> GetAll();
     }
 }

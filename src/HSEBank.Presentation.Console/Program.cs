@@ -18,16 +18,12 @@ public class Program
         System.Console.InputEncoding = Encoding.UTF8;
         System.Console.OutputEncoding = Encoding.UTF8;
 
-
         var services = new ServiceCollection();
 
-        // Repositories (Proxy-кэш поверх InMemory)
+        // Repositories
         services.AddSingleton<InMemoryBankAccountRepository>();
         services.AddSingleton<IBankAccountRepository>(sp =>
             new CachedBankAccountRepository(sp.GetRequiredService<InMemoryBankAccountRepository>()));
-
-        services.AddSingleton<IBankAccountRepository, InMemoryBankAccountRepository>();
-
 
         services.AddSingleton<ICategoryRepository, InMemoryCategoryRepository>();
         services.AddSingleton<IOperationRepository, InMemoryOperationRepository>();
@@ -40,9 +36,20 @@ public class Program
         services.AddSingleton<OperationsFacade>();
         services.AddSingleton<AnalyticsFacade>();
 
-        // Import/Export
+        // Import / Export
+        // Exporters
+        services.AddSingleton<IExportVisitor, JsonAllExportVisitor>();
+        services.AddSingleton<YamlAllExportVisitor>();
+        services.AddSingleton<CsvAccountsExportVisitor>();
+        services.AddSingleton<CsvCategoriesExportVisitor>();
+        services.AddSingleton<CsvOperationExportVisitor>();
+
+        // Importers
+        services.AddSingleton<CsvAccountImporter>();
+        services.AddSingleton<CsvCategoryImporter>();
         services.AddSingleton<CsvOperationImporter>();
-        services.AddSingleton<IExportVisitor, JsonOperationExportVisitor>();
+        services.AddSingleton<JsonAllImporter>();
+        services.AddSingleton<YamlAllImporter>();
 
         // UI
         services.AddSingleton<Shell.AppShell>();
@@ -52,7 +59,13 @@ public class Program
         services.AddSingleton<Screens.AnalyticsScreen>();
         services.AddSingleton<Screens.ImportExportScreen>();
 
-        services.AddLogging(b => b.AddConsole());
+        // Logging
+        services.AddLogging(b =>
+        {
+            b.AddConsole();
+            b.SetMinimumLevel(LogLevel.Information);
+        });
+
         var sp = services.BuildServiceProvider();
 
         sp.GetRequiredService<Shell.AppShell>().Run();

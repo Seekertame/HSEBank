@@ -1,11 +1,12 @@
-﻿namespace HSEBank.Infrastructure.Import
+﻿
+namespace HSEBank.Infrastructure.Import
 {
     public abstract class ImporterBase<T>
     {
         public void Import(Stream input)
         {
             var raw = ReadAll(input);
-            var items = Parse(raw);
+            var items = Parse(raw).ToList();
             Persist(items);
         }
 

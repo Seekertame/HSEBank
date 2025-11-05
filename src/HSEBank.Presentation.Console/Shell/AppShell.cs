@@ -43,7 +43,7 @@ public sealed class AppShell
                 case ConsoleKey.D2: _categories.Run(); break;
                 case ConsoleKey.D3: _operations.Run(_current); break;
                 case ConsoleKey.D4: _analytics.Run(_current); break;
-                case ConsoleKey.D5: _io.Run(_current); break;
+                case ConsoleKey.D5: _io.Run(); break;
                 case ConsoleKey.D0: return;
             }
         }
