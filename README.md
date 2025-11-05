@@ -1,5 +1,10 @@
 # Запуск
 Запустите Program.cs
+
+# Комментарии
+Для удобной проверки импорта я приложил папку с файлами.
+При экмпорте файл будет сохраняться в `...\HSEBank\src\HSEBank.Presentation.Console\bin\Debug\net9.0\exports\...`
+
 # Архитектура
 
 ## Проектная структура
@@ -116,9 +121,13 @@ Presentation.Console  ─────→  Application  ─────→  Domai
         
     - `CachedBankAccountRepository` — **Proxy**: кэширование чтения, запись сквозь в базовый репозиторий.
         
-    - `ImporterBase`/**CsvOperationImporter** — **Template Method** для импорта.
+    - **Импорт (Template Method, `ImporterBase`)**:  
+        `CsvAccountImporter`, `CsvCategoryImporter`, `CsvOperationImporter`,  
+        `JsonAllImporter`, `YamlAllImporter`.
         
-    - `IExportVisitor`/**JsonOperationExportVisitor** — **Visitor** для экспорта.
+    - **Экспорт (Visitor)**:  
+        `CsvAccountsExportVisitor`, `CsvCategoriesExportVisitor`, `CsvOperationExportVisitor`,  
+        `JsonAllExportVisitor`, `YamlAllExportVisitor`.  
         
 - **Presentation.Console** — взаимодействие с пользователем:
     
@@ -186,11 +195,17 @@ Presentation.Console  ─────→  Application  ─────→  Domai
 6. **Импорт/Экспорт**
     
 
-- Импорт: `ImportExportScreen` → `CsvOperationImporter.Import(stream)`  
-    (каркас **Template Method**: `ReadAll → Parse → Persist`).
+- **Импорт снапшота**:  
+    `ImportExportScreen` → `JsonAllImporter.Import(stream)` (**JSON**) или `YamlAllImporter.Import(stream)` (**YAML**).
     
-- Экспорт: `ImportExportScreen` обходит операции текущего счёта, вызывает `IExportVisitor.Visit(op)` → `GetResult()`/**WriteTo(stream)**  
-    (паттерн **Visitor**).
+- **Импорт по CSV-файлам**:  
+    `CsvAccountImporter` (accounts.csv), `CsvCategoryImporter` (categories.csv), `CsvOperationImporter` (operations.csv).
+    
+- **Экспорт снапшота**:  
+    обход всех сущностей → `JsonAllExportVisitor` (**JSON**) или `YamlAllExportVisitor` (**YAML**) → `GetResult()/WriteTo(...)`.
+    
+- **Экспорт CSV**:  
+    по сущностям через визиторы: `CsvAccountsExportVisitor`, `CsvCategoriesExportVisitor`, `CsvOperationExportVisitor`.
     
 
 ## Сквозные политики
@@ -213,8 +228,8 @@ Presentation.Console  ─────→  Application  ─────→  Domai
 | **Factory** (Simple Factory) | Централизованно создавать валидные операции, единая политика ID/валидации                 | `Domain/Factories/OperationFactory.cs`                                                                      | `OperationsFacade.Add(...)` вызывает `OperationFactory.Create(...)`                                 |
 | **Command**                  | Представить пользовательский сценарий как объект (легко логировать/декорировать)          | `Application/Commands/ICommand.cs`, `AddOperationCommand.cs`                                                | `OperationsScreen` создаёт `AddOperationCommand` для добавления операции                            |
 | **Decorator**                | Добавить нефункциональные срезы (тайминг/логирование) без правок команды                  | `Application/Commands/TimedCommand.cs`                                                                      | Обёртка вокруг любой команды: `new TimedCommand(cmd, logger).Execute()`                             |
-| **Template Method**          | Общий каркас импорта: `ReadAll → Parse → Persist`, конкретные форматы переопределяют шаги | `Infrastructure/Import/ImporterBase.cs`, `CsvOperationImporter.cs`                                          | `ImportExportScreen` вызывает `CsvOperationImporter.Import(stream)`                                 |
-| **Visitor**                  | Отделить логику обхода/экспорта данных от самих структур                                  | `Infrastructure/Export/IExportVisitor.cs`, `JsonOperationExportVisitor.cs`                                  | `ImportExportScreen` обходит операции текущего счёта: `visitor.Visit(op)` → `GetResult()/WriteTo()` |
+| **Template Method**          | общий конвейер импорта `ReadAll -> Parse -> Persist` в `ImporterBase`                     | `CsvAccountImporter`, `CsvCategoryImporter`, `CsvOperationImporter`, `JsonAllImporter`, `YamlAllImporter`   | `ImportExportScreen` вызывает (name).Import(stream)          |
+| **Visitor**                  | Отделить логику обхода/экспорта данных от самих структур                                  | `CsvAccountsExportVisitor`, `CsvCategoriesExportVisitor`, `CsvOperationExportVisitor`, `JsonAllExportVisitor`, `YamlAllExportVisitor` | `ImportExportScreen` обходит операции текущего счёта: `visitor.Visit(op)` → `GetResult()/WriteTo()` |
 | **Proxy**                    | Прозрачный кэш поверх репозитория счетов, write-through запись                            | `Infrastructure/Repositories/CachedBankAccountRepository.cs`                                                | В DI (`Program.cs`): `IBankAccountRepository` = `CachedBankAccountRepository(InMemory...)`          |
 
 ### Пояснения и связи
@@ -301,7 +316,7 @@ Presentation.Console  ─────→  Application  ─────→  Domai
     
     - `OperationFactory` создаёт `Operation` (знает её зависимости и правила).
         
-- **Polymorphism/Indirection (опционально, но уместно отметить)**
+- **Polymorphism/Indirection**
     
     - Полиморфизм по репозиториям (`I*Repository`) и по импортёрам/экспортёрам (`ImporterBase`, `IExportVisitor`) снижает сцепление и упрощает расширение.
         
