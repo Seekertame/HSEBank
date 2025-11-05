@@ -1,5 +1,10 @@
 # Запуск
-Запустите Program.cs
+Команды для запуска в терминале
+```
+dotnet restore
+dotnet build
+dotnet run --project src/HSEBank.Presentation.Console
+```
 
 # Комментарии
 Для удобной проверки импорта я приложил папку с файлами.
