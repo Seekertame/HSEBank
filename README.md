@@ -39,13 +39,23 @@ src/
       InMemoryBankAccountRepository.cs
       InMemoryCategoryRepository.cs
       InMemoryOperationRepository.cs
-      CachedBankAccountRepository.cs   # Proxy над счётами (write-through кэш)
+      CachedBankAccountRepository.cs   # Proxy над счётами
     Import/
-      ImporterBase.cs                 # Template Method
-      CsvOperationImporter.cs         # Импорт операций из CSV
+      ImporterBase.cs                      # Template Method: ReadAll -> Parse -> Persist
+      CsvAccountImporter.cs                # Accounts из CSV
+      CsvCategoryImporter.cs               # Categories из CSV
+      CsvOperationImporter.cs              # Operations из CSV
+      JsonAllImporter.cs                   # Полный снапшот (accounts+categories+operations) из JSON
+      YamlAllImporter.cs                   # Полный снапшот из YAML
     Export/
-      IExportVisitor.cs               # Контракт посетителя
-      JsonOperationExportVisitor.cs   # Экспорт операций в JSON
+      IExportVisitor.cs                    # Контракт Visitor
+      CsvAccountsExportVisitor.cs          # Accounts -> CSV
+      CsvCategoriesExportVisitor.cs        # Categories -> CSV
+      CsvOperationExportVisitor.cs         # Operations -> CSV
+      JsonAllExportVisitor.cs              # Полный снапшот -> JSON
+      JsonOperationExportVisitor.cs        # Только операции -> JSON (по требованию)
+      YamlAllExportVisitor.cs              # Полный снапшот -> YAML
+
 
   HSEBank.Presentation.Console/   # Консольный UI
     Program.cs                    # Composition Root: DI, запуск Shell
@@ -56,7 +66,7 @@ src/
       CategoriesScreen.cs         # Категории: список/создать/переименовать/удалить
       OperationsScreen.cs         # Операции: список/добавить/удалить/редактировать
       AnalyticsScreen.cs          # Аналитика: сальдо и агрегирование по категориям
-      ImportExportScreen.cs       # Экспорт JSON / импорт CSV
+      ImportExportScreen.cs       # Экспорт JSON/YAML/CSV и импорт JSON/YAML/CSV
     UI/
       ConsoleUi.cs                # Общие утилиты ввода-вывода
 ```
@@ -71,13 +81,13 @@ Presentation.Console  ─────→  Application  ─────→  Domai
                 Infrastructure  ─────→  Domain
 ```
 
-- **Presentation** зависит только от **Application** (и DI-контейнера).
+- **Presentation** зависит только от **Application** (и DI).
     
-- **Application** зависит только от **Domain** (интерфейсы репозиториев).
+- **Application** зависит только от **Domain** (контракты репозиториев, фабрики/сервисы).
     
-- **Infrastructure** реализует эти интерфейсы и подключается через DI в `Program.cs`.
+- **Infrastructure** реализует контракты и подключается через DI в `Program.cs`.
     
-- **Domain** не зависит ни от чего.
+- **Domain** ни от кого не зависит.
     
 
 ## Зоны ответственности
